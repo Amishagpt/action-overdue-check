@@ -1,24 +1,148 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Excel Action Analyzer</title>
-    <meta name="description" content="Analyze Excel files to track action completion and overdue items with detailed reporting" />
-    <meta name="author" content="Excel Action Analyzer" />
+    <meta name="description" content="Analyze Excel files to track action completion and overdue items with detailed reporting">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Excel Action Analyzer</h1>
+            <p>Analyze Action and Due Date columns to track completion and overdue items</p>
+        </div>
 
-    <meta property="og:title" content="Excel Action Analyzer" />
-    <meta property="og:description" content="Analyze Excel files to track action completion and overdue items with detailed reporting" />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+        <div class="upload-card">
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" id="fileInput" accept=".xlsx,.xls">
+                <div class="upload-content">
+                    <div class="upload-icon" id="uploadIcon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7,10 12,15 17,10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </div>
+                    <h3 id="uploadTitle">Drop Excel file here</h3>
+                    <p>Or click to browse for .xlsx or .xls files</p>
+                    <button type="button" class="browse-btn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"></path>
+                        </svg>
+                        Choose File
+                    </button>
+                </div>
+            </div>
+        </div>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-  </head>
+        <div class="error-card" id="errorCard" style="display: none;">
+            <div class="error-content">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                </svg>
+                <div>
+                    <h3>Analysis Error</h3>
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </div>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <div class="summary-card">
+                <div class="card-header">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22,4 12,14.01 9,11.01"></polyline>
+                    </svg>
+                    <span>Analysis Summary</span>
+                </div>
+                <div class="card-content">
+                    <p class="summary-text" id="summaryText"></p>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="card-header">
+                        <h3>Total Items</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat-number primary" id="totalCount">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="card-header">
+                        <h3>Assigned</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat-number success" id="assignedCount">0</div>
+                        <div class="stat-subtitle" id="assignedPct">0% of total</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="card-header">
+                        <h3>Overdue</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="stat-number danger" id="overdueCount">0</div>
+                        <div class="stat-subtitle" id="overduePct">0% of assigned</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-card">
+                <div class="card-header">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>Analysis Details</span>
+                </div>
+                <div class="card-content">
+                    <div class="details-grid">
+                        <div>
+                            <strong>Analysis Date:</strong> <span id="analysisDate"></span>
+                        </div>
+                        <div>
+                            <strong>Timezone:</strong> <span id="timezone"></span>
+                        </div>
+                        <div>
+                            <strong>Action Column:</strong> <span id="actionColumn"></span>
+                        </div>
+                        <div>
+                            <strong>Due Date Column:</strong> <span id="dueDateColumn"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="notes-section" id="notesSection" style="display: none;">
+                        <h4>Notes:</h4>
+                        <ul id="notesList"></ul>
+                    </div>
+                    
+                    <details class="json-output">
+                        <summary>View JSON Output</summary>
+                        <pre id="jsonOutput"></pre>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="script.js"></script>
+</body>
 </html>
